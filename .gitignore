@@ -150,3 +150,130 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# MATLAB-specific files and directories
+*.asv
+*.m~ 
+*.mlx
+*.mlappinstall
+*.mlpkginstall
+*.mex*
+*.mdlp
+*.mlproj
+
+# MATLAB Code files backup
+*.bak
+*.asv
+
+# MATLAB Code analyzer report
+*.rpt
+
+# MATLAB App Designer project files
+*.mlapp
+
+# MATLAB Code files with encrypted contents
+*.p
+
+# Simulink Cache and Code Generation files
+slprj/
+*_slprj/
+*_sfprj/
+*.mexw64
+*.mexmaci64
+*.mexmaci32
+*.mexw32
+
+# Simulink Simulation files
+*.sim
+*.slxc
+*.slx
+
+# Simulink Output files
+*.log
+*.out
+
+# Stateflow Chart file
+*.cdl
+
+# MATLAB files for identifying a working directory
+*.mwlt
+
+# MATLAB test files
+*.mtest
+
+# MATLAB error files
+*.err
+
+# MATLAB temp files
+*.tmp
+
+# MATLAB binary MAT-files
+*.mat
+*.mcc
+
+# MATLAB Model Reference Simulation Target files
+*_mrt_rtw/
+
+# MATLAB project related files
+*.prj
+
+# MATLAB coverage report files
+*.cvr
+
+# Matlab preferences directory
+.prefdir/
+
+# Matlab generated figures
+*.fig
+*.jpeg
+*.jpg
+*.tiff
+*.tif
+*.png
+*.bmp
+
+# MATLAB workspace and workspace files
+*.mldatx
+*.mldata
+
+# Compiled C/C++ files
+*.mex*
+
+# Simulink files
+*.slxc
+*.slx
+
+# MATLAB support packages
+*.mlpkginstall
+
+# MATLAB stored paths
+pathdef.m
+
+# Ignore other common files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.lock
+
+# Project files that can be shared by many people
+# Include them in the version control
+# .matlab/startup.m
+# .matlab/toolboxes.m
+
+# MATLAB Projects
+*.mlproj
+
+# MATLAB workspace files
+*.mat
+
+# MATLAB Code Analyzer Report
+*.rpt
+
+# MATLAB Simulink Project Definition
+*.prj
+
