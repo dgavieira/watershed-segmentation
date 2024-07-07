@@ -1,67 +1,145 @@
-import cv2
+import os
+import sys
 import numpy as np
+import matplotlib.pyplot as plt
+import logging
 
-if __name__ == '__main__':
-    # Carregar a imagem
+# Adicionando o diretório pai ao path para permitir importações relativas
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-    image = cv2.imread('python/images/water_coins.jpg')
-    rgb_image = image.copy()
+from src.inputs.read import imread
+from src.channel.convert import rgb2gray
+from src.filters.median import median_blur
+from src.thresh.functions import threshold
+from src.morph.functions import morphology_ex
+from src.transforms.geometric import distance_transform
+from src.segmentation.morphologic import watershed
+
+
+# Configuração básica do logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
+# Função para garantir que o diretório de saída existe
+def ensure_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+# Função principal para executar o processo completo
+def main(filename):
+    # Carregar imagem
+    logging.info(f"Iniciando processamento da imagem: {filename}")
+    rgb_image = imread(filename)
+
+    # Criar diretório para salvar imagens, se não existir
+    output_dir = 'python/images/'
+    ensure_dir(output_dir)
+
     # Salvar a imagem original
-    cv2.imwrite('python/images/original.jpg', rgb_image)
+    original_path = os.path.join(output_dir, 'original.jpg')
+    plt.imsave(original_path, rgb_image)
+    logging.info(f"Imagem original salva em: {original_path}")
 
     # Converter para escala de cinza
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray_image = rgb2gray(rgb_image)
 
     # Salvar a imagem em escala de cinza
-    cv2.imwrite('python/images/gray_image.jpg', gray_image)
+    gray_path = os.path.join(output_dir, 'gray_image.jpg')
+    plt.imsave(gray_path, gray_image, cmap='gray')
+    logging.info(f"Imagem em escala de cinza salva em: {gray_path}")
 
-    # Aplicar um filtro de suavização para reduzir o ruído
-    gray_image = cv2.medianBlur(gray_image, 5)
+    # Aplicar filtro de mediana para suavização
+    blurred_image = median_blur(gray_image, 5)
 
-    # Gerar a máscara de fundo utilizando a detecção de bordas
-    ret, thresh = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    # Salvar a imagem suavizada
+    blurred_path = os.path.join(output_dir, 'blurred_image.jpg')
+    plt.imsave(blurred_path, blurred_image, cmap='gray')
+    logging.info(f"Imagem suavizada salva em: {blurred_path}")
+
+    # Aplicar limiarização para obter a máscara de fundo
+    thresh = threshold(blurred_image, 100, 255)
 
     # Salvar a imagem da máscara de fundo
-    cv2.imwrite('python/images/background_mask.jpg', thresh)
+    mask_path = os.path.join(output_dir, 'background_mask.jpg')
+    plt.imsave(mask_path, thresh, cmap='gray')
+    logging.info(f"Máscara de fundo salva em: {mask_path}")
 
-    # Aplicar o algoritmo de transformação morfológica para melhorar a máscara de fundo
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+    # Aplicar operações morfológicas para melhorar a máscara de fundo
+    kernel = np.ones((3, 3), dtype=np.uint8)
+    opening = morphology_ex(thresh, 'opening', kernel)
 
-    # Encontrar a área certa da máscara de fundo
-    sure_bg = cv2.dilate(opening, kernel, iterations=3)
+    # Salvar a imagem da área de fundo melhorada
+    sure_bg_path = os.path.join(output_dir, 'sure_bg.jpg')
+    plt.imsave(sure_bg_path, opening, cmap='gray')
+    logging.info(f"Área de fundo melhorada salva em: {sure_bg_path}")
 
-    # Salvar a imagem do fundo certo
-    cv2.imwrite('python/images/sure_bg.jpg', sure_bg)
+    # Aplicar a transformação de distância para a área segura
+    dist_transform = distance_transform(opening)
 
-    # Aplicar a transformação de distância para a área certa
-    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+    # Salvar a imagem da transformação de distância
+    dist_transform_path = os.path.join(output_dir, 'distance_transform.jpg')
+    plt.imsave(dist_transform_path, dist_transform, cmap='gray')
+    logging.info(f"Transformação de distância salva em: {dist_transform_path}")
 
-    # Aplicar o limite para encontrar a área de segurança
-    ret, sure_fg = cv2.threshold(dist_transform, 0.7*dist_transform.max(), 255, 0)
+    # Aplicar limiarização na transformação de distância para obter marcadores
+    markers = threshold(dist_transform, 20, 255)
 
-    # Salvar a imagem da área de segurança
-    cv2.imwrite('python/images/sure_fg.jpg', sure_fg)
+    # Salvar a imagem dos marcadores
+    markers_path = os.path.join(output_dir, 'markers.jpg')
+    plt.imsave(markers_path, markers, cmap='gray')
+    logging.info(f"Marcadores salvos em: {markers_path}")
 
-    # Encontrar a área desconhecida
-    sure_fg = np.uint8(sure_fg)
-    unknown = cv2.subtract(sure_bg, sure_fg)
-
-    # Salvar a imagem da área desconhecida
-    cv2.imwrite('python/images/unknown.jpg', unknown)
-
-    # Marcadores de localização para o watershed
-    ret, markers = cv2.connectedComponents(sure_fg)
-
-    # Adicionar um para todas as marcas para garantir que o fundo seja marcado com 0
-    markers = markers + 1
-
-    # Marcar a área desconhecida com 0
-    markers[unknown == 255] = 0
-
-    # Aplicar o algoritmo watershed
-    markers = cv2.watershed(image, markers)
-    image[markers == -1] = [255, 0, 0]
+    # Aplicar algoritmo watershed com base nos marcadores
+    result = watershed(rgb_image, markers)
 
     # Salvar a imagem do resultado do watershed
-    cv2.imwrite('python/images/watershed_result.jpg', image)
+    watershed_result_path = os.path.join(output_dir, 'watershed_result.jpg')
+    plt.imsave(watershed_result_path, result)
+    logging.info(f"Resultado do watershed salvo em: {watershed_result_path}")
+    logging.info("Processamento concluído!")
+
+    # Retornar os caminhos das imagens geradas
+    return {
+        'original': original_path,
+        'gray_image': gray_path,
+        'blurred_image': blurred_path,
+        'background_mask': mask_path,
+        'sure_background': sure_bg_path,
+        'distance_transform': dist_transform_path,
+        'markers': markers_path,
+        'watershed_result': watershed_result_path
+    }
+
+def generate_html(images_paths):
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Resultado do Processamento de Imagem</title>
+    <style>
+    .image-container {
+        display: inline-block;
+        margin: 10px;
+    }
+    </style>
+    </head>
+    <body>
+    <h1>Resultado do Processamento de Imagem</h1>
+    """
+
+    for name, path in images_paths.items():
+        html_content += f"<div class='image-container'><h3>{name}</h3><img src='{path}'></div>"
+
+    html_content += """
+    </body>
+    </html>
+    """
+
+    with open('python/images/result.html', 'w') as file:
+        file.write(html_content)
+
+# Executar o processo principal
+if __name__ == "__main__":
+    images_paths = main('python/images/water_coins.jpg')
+    generate_html(images_paths)
+    print("Arquivo HTML gerado com sucesso: python/images/result.html")
