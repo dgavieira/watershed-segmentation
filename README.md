@@ -20,3 +20,13 @@
       - `binarizeImage` - apply binarization using Otsu Method
       - `calculateComplementeDistanceTransform` - computes the complement of the distance transform
       - `calculateDistanceTransform` - computes distance transform
+      - `fillHoles` - Preprocessing function that removes noises from the image
+      - `main` - main file of the application
+      - `overlaySegmentation` - postprocessing function that applies overlaying of the result image to the original image
+      - `removeSmallObjects` - preprocessing function that removes noises from the image
+- `python` - Python Code using OpenCV, Scikit-Image and Numpy
+    - `images` - images used on the application
+    - `notebooks`
+      - `watershed_opencv` - jupyter notebook applying watershed segmentation using OpenCV framework
+      - `watershed_scikit_image` - jupyter notebook applying watershed segmentation using Scikit-Image framework
+    - `src` - framework using only python native libraries and numpy to implement the watershed segmentation steps
