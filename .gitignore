@@ -229,7 +229,6 @@ slprj/
 *.jpg
 *.tiff
 *.tif
-*.png
 *.bmp
 
 # MATLAB workspace and workspace files
