@@ -30,3 +30,32 @@
       - `watershed_opencv` - jupyter notebook applying watershed segmentation using OpenCV framework
       - `watershed_scikit_image` - jupyter notebook applying watershed segmentation using Scikit-Image framework
     - `src` - framework using only python native libraries and numpy to implement the watershed segmentation steps
+      - `filters` - package to implement spatial filtering
+      - `morph` - package to implement morphologic operations
+      - `segmentation` - package to implement segmentation operations
+      - `thresh` - package to implement thresholding operations
+      - `transforms` - package to implement transform operations
+      - `example.py` - execute the Watershed Segmentation using OpenCV package
+      - `main.py` - execute the Watershed Segmentation using the proprietary package
+
+# Result Examples
+
+## The image to be processed: 
+
+<div style="display: flex; flex-direction: row;">
+  <img src="figure-01.png" alt="OpenAI Logo" style="flex: 1; object-fit: contain; margin: 5px;"/>
+  <img src="figure-02.png" alt="Another Image" style="flex: 1; object-fit: contain; margin: 5px;"/>
+</div>
+
+## Images with the topographic elevation maps - Dams.
+
+![topographic-map](figure-03.png)
+
+## Image with Markers
+
+![markers](figure-04.png)
+
+## Segmented Resulting Image
+
+![segmented](figure-05.png)
+
